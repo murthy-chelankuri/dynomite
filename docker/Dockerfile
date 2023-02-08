@@ -19,7 +19,7 @@
 ##########################################################################
 
 # Set the base image to Ubuntu
-FROM ubuntu
+FROM ubuntu:20.04
 
 # File Author / Maintainer
 MAINTAINER Ioannis Papapanagiotou - dynomite@netflix.com
@@ -29,6 +29,7 @@ RUN apt-get update && \
 	export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -y \
 	autoconf \
+    wget \
 	build-essential \
 	dh-autoreconf \
 	git \
@@ -42,8 +43,6 @@ RUN apt-get update && \
 #RUN git clone https://github.com/Netflix/dynomite.git
 RUN git clone https://github.com/murthy-chelankuri/dynomite.git
 RUN echo 'Git repo has been cloned in your Docker VM'
-#Customized branch for more database connections
-RUN git checkout -b v0.7.1
 
 RUN echo 'copy file'
 COPY scripts/startup.sh dynomite/startup.sh
@@ -51,6 +50,9 @@ RUN echo 'done copying file'
 
 # Move to working directory
 WORKDIR dynomite/
+
+#Customized branch for more database connections
+RUN git checkout -b v0.7.1
 
 # Autoreconf
 RUN autoreconf -fvi \

@@ -89,6 +89,7 @@ conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
   log_notice("%s Creating %s", print_obj(cp->owner), print_obj(cp));
   uint16_t idx = 0;
   for (idx = 0; idx < max_connections; idx++) {
+    log_error("Creating connections id %d", idx);
     struct conn **pconn = array_push(&cp->active_connections);
     *pconn = NULL;
   }
