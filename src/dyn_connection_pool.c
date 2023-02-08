@@ -6,7 +6,7 @@
 
 struct conn_pool {
   struct object obj;
-  uint8_t max_connections;  // connections this conn_pool owns
+  uint16_t max_connections;  // connections this conn_pool owns
   void *owner;              // the owner of this conn pool, this gets passed
                             // to each connection
   struct context *ctx;
@@ -62,7 +62,7 @@ static void _create_missing_connections(conn_pool_t *cp) {
 }
 
 conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
-                              uint8_t max_connections,
+                              uint16_t max_connections,
                               func_conn_init_t func_conn_init,
                               uint8_t max_failures, sec_t max_timeout) {
   conn_pool_t *cp = dn_alloc(sizeof(struct conn_pool));
@@ -87,7 +87,7 @@ conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
   cp->scheduled_reconnect_task = NULL;
 
   log_notice("%s Creating %s", print_obj(cp->owner), print_obj(cp));
-  uint8_t idx = 0;
+  uint16_t idx = 0;
   for (idx = 0; idx < max_connections; idx++) {
     struct conn **pconn = array_push(&cp->active_connections);
     *pconn = NULL;

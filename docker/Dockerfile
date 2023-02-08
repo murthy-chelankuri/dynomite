@@ -36,11 +36,14 @@ RUN apt-get update && \
 	libtool \
 	software-properties-common \
 	redis-server \
-	tcl8.5 
+	tcl
 
 # Clone the Dynomite Git
-RUN git clone https://github.com/Netflix/dynomite.git
+#RUN git clone https://github.com/Netflix/dynomite.git
+RUN git clone https://github.com/murthy-chelankuri/dynomite.git
 RUN echo 'Git repo has been cloned in your Docker VM'
+#Customized branch for more database connections
+RUN git checkout -b v0.7.1
 
 RUN echo 'copy file'
 COPY scripts/startup.sh dynomite/startup.sh
@@ -51,8 +54,8 @@ WORKDIR dynomite/
 
 # Autoreconf
 RUN autoreconf -fvi \
-	&& ./configure --enable-debug=log \
-	&& CFLAGS="-ggdb3 -O0" ./configure --enable-debug=full \
+    && ./configure --enable-debug=log --build=$(uname -m)-unknown-linux-gnu \
+	&& CFLAGS="-ggdb3 -O0" ./configure --enable-debug=full --build=$(uname -m)-unknown-linux-gnu \
 	&& make \
 	&& make install
 
