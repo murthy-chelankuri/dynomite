@@ -48,7 +48,7 @@ static void _create_missing_connections(conn_pool_t *cp) {
     struct conn *conn = conn_get(cp->owner, cp->func_conn_init);
     if (conn != NULL) {
       conn->conn_pool = cp;
-      log_notice("%s %s created %s", print_obj(cp->owner), print_obj(cp),
+      printf("DEBUG : %s %s created %s", print_obj(cp->owner), print_obj(cp),
                  print_obj(conn));
       *pconn = conn;  // set that in the array
       cp->active_conn_count++;
