@@ -180,7 +180,7 @@ static void dnode_create_connection_pool(struct server_pool *sp,
   if (peer->conn_pool) return;
   struct context *ctx = sp->ctx;
   if (!peer->is_local) {
-    uint8_t max_connections = peer->is_same_dc
+    uint16_t max_connections = peer->is_same_dc
                                   ? sp->max_local_peer_connections
                                   : sp->max_remote_peer_connections;
     peer->conn_pool = conn_pool_create(

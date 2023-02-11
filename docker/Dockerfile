@@ -19,7 +19,7 @@
 ##########################################################################
 
 # Set the base image to Ubuntu
-FROM ubuntu
+FROM ubuntu:20.04
 
 # File Author / Maintainer
 MAINTAINER Ioannis Papapanagiotou - dynomite@netflix.com
@@ -29,6 +29,7 @@ RUN apt-get update && \
 	export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -y \
 	autoconf \
+    wget \
 	build-essential \
 	dh-autoreconf \
 	git \
@@ -36,10 +37,11 @@ RUN apt-get update && \
 	libtool \
 	software-properties-common \
 	redis-server \
-	tcl8.5 
+	tcl
 
 # Clone the Dynomite Git
-RUN git clone https://github.com/Netflix/dynomite.git
+#RUN git clone https://github.com/Netflix/dynomite.git
+RUN git clone https://github.com/murthy-chelankuri/dynomite.git
 RUN echo 'Git repo has been cloned in your Docker VM'
 
 RUN echo 'copy file'
@@ -49,10 +51,13 @@ RUN echo 'done copying file'
 # Move to working directory
 WORKDIR dynomite/
 
+#Customized branch for more database connections
+RUN git checkout -b v0.7.1
+
 # Autoreconf
 RUN autoreconf -fvi \
-	&& ./configure --enable-debug=log \
-	&& CFLAGS="-ggdb3 -O0" ./configure --enable-debug=full \
+    && ./configure --enable-debug=log --build=$(uname -m)-unknown-linux-gnu \
+	&& CFLAGS="-ggdb3 -O0" ./configure --enable-debug=full --build=$(uname -m)-unknown-linux-gnu \
 	&& make \
 	&& make install
 

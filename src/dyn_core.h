@@ -162,7 +162,7 @@ struct datastore {
   struct string name; /* name (ref in conf_server) */
 
   conn_pool_t *conn_pool;
-  uint8_t max_connections;
+  uint16_t max_connections;
 
   msec_t next_retry_ms;   /* next retry time in msec */
   uint32_t failure_count; /* # consecutive failures */

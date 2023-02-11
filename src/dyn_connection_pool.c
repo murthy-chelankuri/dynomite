@@ -6,7 +6,7 @@
 
 struct conn_pool {
   struct object obj;
-  uint8_t max_connections;  // connections this conn_pool owns
+  uint16_t max_connections;  // connections this conn_pool owns
   void *owner;              // the owner of this conn pool, this gets passed
                             // to each connection
   struct context *ctx;
@@ -15,11 +15,11 @@ struct conn_pool {
 
   // connection state
   struct array active_connections; /* pool connections */
-  uint8_t active_conn_count;       /* Count of currently good connections */
+  uint16_t active_conn_count;       /* Count of currently good connections */
 
   // backoff logic
-  uint8_t failure_count;
-  uint8_t max_failure_count;
+  uint16_t failure_count;
+  uint16_t max_failure_count;
   msec_t current_timeout_sec;
   msec_t max_timeout_sec;
   struct task *scheduled_reconnect_task;
@@ -37,7 +37,7 @@ static char *_print_conn_pool(const struct object *obj) {
 
 static void _create_missing_connections(conn_pool_t *cp) {
   // create connections if they are less than required.
-  uint8_t idx = 0, failures = 0;
+  uint16_t idx = 0, failures = 0;
   uint32_t count = array_n(&cp->active_connections);
   while (idx < count) {
     struct conn **pconn = array_get(&cp->active_connections, idx);
@@ -48,8 +48,8 @@ static void _create_missing_connections(conn_pool_t *cp) {
     struct conn *conn = conn_get(cp->owner, cp->func_conn_init);
     if (conn != NULL) {
       conn->conn_pool = cp;
-      log_notice("%s %s created %s", print_obj(cp->owner), print_obj(cp),
-                 print_obj(conn));
+      log_debug(LOG_DEBUG, "DEBUG : %s %s created %s", print_obj(cp->owner), print_obj(cp),
+                                            print_obj(conn));
       *pconn = conn;  // set that in the array
       cp->active_conn_count++;
       idx++;
@@ -62,7 +62,7 @@ static void _create_missing_connections(conn_pool_t *cp) {
 }
 
 conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
-                              uint8_t max_connections,
+                              uint16_t max_connections,
                               func_conn_init_t func_conn_init,
                               uint8_t max_failures, sec_t max_timeout) {
   conn_pool_t *cp = dn_alloc(sizeof(struct conn_pool));
@@ -74,6 +74,7 @@ conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
   cp->func_conn_init = func_conn_init;
 
   cp->active_conn_count = 0;
+  log_notice("----- Before array_init");
   if (array_init(&cp->active_connections, max_connections,
                  sizeof(struct conn *)) != DN_OK) {
     log_notice("%s Failed to initialize conn array", print_obj(owner));
@@ -87,8 +88,9 @@ conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
   cp->scheduled_reconnect_task = NULL;
 
   log_notice("%s Creating %s", print_obj(cp->owner), print_obj(cp));
-  uint8_t idx = 0;
+  uint16_t idx = 0;
   for (idx = 0; idx < max_connections; idx++) {
+    log_error("Creating connections id %d", idx);
     struct conn **pconn = array_push(&cp->active_connections);
     *pconn = NULL;
   }
@@ -101,9 +103,10 @@ rstatus_t conn_pool_preconnect(conn_pool_t *cp) {
   _create_missing_connections(cp);
   // for each conn in array, call conn_connect
   rstatus_t overall_status = DN_OK;
-  uint8_t idx = 0;
+  uint16_t idx = 0;
   uint32_t count = array_n(&cp->active_connections);
   for (idx = 0; idx < count; idx++) {
+    log_warn("%d initializing connection.....", idx);
     struct conn **pconn = array_get(&cp->active_connections, idx);
     if (*pconn == NULL) continue;
     struct conn *conn = *pconn;
