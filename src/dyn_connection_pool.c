@@ -74,7 +74,6 @@ conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
   cp->func_conn_init = func_conn_init;
 
   cp->active_conn_count = 0;
-  log_notice("----- Before array_init");
   if (array_init(&cp->active_connections, max_connections,
                  sizeof(struct conn *)) != DN_OK) {
     log_notice("%s Failed to initialize conn array", print_obj(owner));
@@ -90,7 +89,6 @@ conn_pool_t *conn_pool_create(struct context *ctx, void *owner,
   log_notice("%s Creating %s", print_obj(cp->owner), print_obj(cp));
   uint16_t idx = 0;
   for (idx = 0; idx < max_connections; idx++) {
-    log_error("Creating connections id %d", idx);
     struct conn **pconn = array_push(&cp->active_connections);
     *pconn = NULL;
   }
@@ -136,7 +134,7 @@ struct conn *conn_pool_get(conn_pool_t *cp, int tag) {
 }
 
 rstatus_t conn_pool_destroy(conn_pool_t *cp) {
-  uint8_t idx = 0;
+  uint16_t idx = 0;
   uint32_t count = array_n(&cp->active_connections);
   for (idx = 0; idx < count; idx++) {
     struct conn **pconn = array_get(&cp->active_connections, idx);
@@ -163,7 +161,7 @@ void conn_pool_notify_conn_close(conn_pool_t *cp, struct conn *conn) {
   log_notice("%s Removing %s", print_obj(cp), print_obj(conn));
   if (conn == NULL) return;
 
-  uint8_t idx = 0;
+  uint16_t idx = 0;
   uint32_t count = array_n(&cp->active_connections);
   for (idx = 0; idx < count; idx++) {
     struct conn **pconn = array_get(&cp->active_connections, idx);

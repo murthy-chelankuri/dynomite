@@ -474,7 +474,6 @@ rstatus_t server_pool_init(struct server_pool *sp, struct conf_pool *cp,
 
   sp->ctx = ctx;
   struct datastore *datastore = sp->datastore;
-  log_warn("-------- max_connections = %d" , datastore->max_connections);
   datastore->conn_pool = conn_pool_create(
       ctx, datastore, datastore->max_connections, init_server_conn,
       sp->server_failure_limit, sp->server_retry_timeout_ms / 1000);
