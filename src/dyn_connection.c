@@ -275,8 +275,6 @@ rstatus_t conn_connect(struct context *ctx, struct conn *conn) {
     status = DN_ERROR;
     goto error;
   }
-  log_warn("%s murthy connecting.....", print_obj(conn));
-
   status = dn_set_nonblocking(conn->sd);
   if (status != DN_OK) {
     log_error("set nonblock on s %d for '%.*s' failed: %s", conn->sd,
